@@ -7,6 +7,7 @@ class TareasSerializer(serializers.Serializer):
     titulo = serializers.CharField(max_length=100)
     descripcion = serializers.CharField()
     estado = serializers.CharField(default="pendiente", max_length=20, required=False)
+    imagen = serializers.ImageField(required=False)  # Campo opcional para imagen
 
     def validate_titulo(self, value):
         if len(value) < 5:

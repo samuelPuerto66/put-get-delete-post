@@ -1,1 +1,37 @@
-GET = http://127.0.0.1:8000/api/tareas/
+GET http://127.0.0.1:8000/api/tareas/
+
+
+POST  http://127.0.0.1:8000/api/registro/
+Content-Type: application/json
+
+{
+    "email" : "aprendiz@example.com",
+    "password" : "password123"
+}
+
+POST  http://127.0.0.1:8000/api/login/
+Content-Type: application/json
+
+{
+    "email" : "aprendiz@example.com",
+    "password" : "password123"
+}
+
+###
+POST http://127.0.0.1:8000/api/tareas/
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="titulo"
+
+Mi tarea con imagen
+------WebKitFormBoundary
+Content-Disposition: form-data; name="descripcion"
+
+Descripción de la tarea
+------WebKitFormBoundary
+Content-Disposition: form-data; name="imagen"; filename="imagen.jpg"
+Content-Type: image/jpeg
+
+< ./imagen.jpg
+------WebKitFormBoundary--

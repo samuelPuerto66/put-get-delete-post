@@ -1,7 +1,11 @@
 from django.urls import path
 from .views import TareasAPIView
+from .views_auth import RegistroAPIView, LoginAPIView
 
 urlpatterns = [
-    path('tareas/', TareasAPIView.as_view()),
-    path('tareas/<str:id>/', TareasAPIView.as_view()),
+    path('auth/registro/', RegistroAPIView.as_view(), name='api_registro'),
+    path('auth/login/', LoginAPIView.as_view(), name='api_login'),
+
+    path('tareas/', TareasAPIView.as_view(), name='api_tareas'),
+    path('tareas/<str:tarea_id>/', TareasAPIView.as_view(), name='api_tarea_detalle'),
 ]
