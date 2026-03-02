@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from firebase_admin import auth, firestore
 from backend.backend.firebase_config import get_firestore_client
 
 db = get_firestore_client()
+load_dotenv()
 
 class RegistroAPIView(APIView):
     """
@@ -61,6 +63,7 @@ class LoginAPIView(APIView):
 
         # Obtener la API key de Firebase (deberías configurarla en settings o env)
         api_key = os.getenv('FIREBASE_WEB_API_KEY')  # Asegúrate de tener esta variable de entorno
+        print(api_key)
 
         # ENDPOINT OFICIAL
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={api_key}"

@@ -1,7 +1,7 @@
-GET http://127.0.0.1:8000/api/tareas/
+GET http://127.0.0.1:8000/api/login/
 
 
-POST  http://127.0.0.1:8000/api/registro/
+POST  http://127.0.0.1:8000/api/auth/registro/
 Content-Type: application/json
 
 {
@@ -9,7 +9,7 @@ Content-Type: application/json
     "password" : "password123"
 }
 
-POST  http://127.0.0.1:8000/api/login/
+POST  http://127.0.0.1:8000/api/auth/login/
 Content-Type: application/json
 
 {
@@ -35,3 +35,16 @@ Content-Type: image/jpeg
 
 < ./imagen.jpg
 ------WebKitFormBoundary--
+
+### SUBIR LA FOTO DE PERFIL A CLOUDINARY
+
+POST http://127.0.0.1:8000/api/perfil/foto/
+Authorization: Bearer
+Content-Type: multipart/form-data; boundary=MiBoundary
+
+--MiBoundary
+Content-Disposition: form-data; name="imagen"; filename="avatar.jpg"
+Content-Type: image/jpeg 
+
+C:\Users\SENA\Desktop\el\put-get-delete-post\avatar.jpg
+---MiBoundary--

@@ -1,37 +1,45 @@
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from firebase_admin import auth
-import firebase_admin
+from backend.backend.firebase_config import get_firestore_client
 
-class  FirebaseAuthentication(BaseAuthentication):
-    """
-    leer el token JWT del encabezado, lo va a validar con firebase y va extraer el UID del usuario
+db = get_firestore_client()
 
-    """
+class FirebaseAuthentication(BaseAuthentication):
 
     def authenticate(self, request):
-        #extrar el Token
-        auth_header = request.META.get ('HTTP_AUTHORIZATION') or request.headers.get('Authorization')
+
+        auth_header = request.META.get('HTTP_AUTHORIZATION') or request.headers.get('Authorization')
+
         if not auth_header:
-            return None #si no hay token 
-        #el token viene "Bearer <<Token>>"
-        partes = auth_header.split()
-        
-        if len(partes) !=2 or partes[0].lower() != 'bearer':
             return None
-        
+
+        partes = auth_header.split()
+
+        if len(partes) != 2 or partes[0].lower() != 'bearer':
+            return None
+
         token = partes[1]
 
-        try: 
-            #le pido a firebase que valide la firma del Token
+        try:
             decoded_token = auth.verify_id_token(token)
+
             uid = decoded_token.get('uid')
-            # Usuario
+            email = decoded_token.get('email')
+
+            user_profile = db.collection('perfiles').document(uid).get()
+            rol = user_profile.to_dict().get('rol', 'aprendiz') if user_profile.exists else 'aprendiz'
+
             class FirebaseUser:
                 is_authenticated = True
-                def __init__(self, uid):
+
+                def __init__(self, uid, email, rol):
                     self.uid = uid
-                    return (FirebaseUser(uid), decoded_token)
+                    self.email = email
+                    self.rol = rol
+                    self.is_authenticated = True
+
+            return (FirebaseUser(uid, email, rol), decoded_token)
+
         except Exception as e:
             raise AuthenticationFailed(f"Token no es valido o esta expirado: {str(e)}")
-        
