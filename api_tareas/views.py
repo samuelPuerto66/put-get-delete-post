@@ -7,8 +7,6 @@ from firebase_admin import firestore, storage
 from rest_framework.permissions import IsAuthenticated
 from .authentication import FirebaseAuthentication
 
-db = get_firestore_client()
-
 
 class TareasAPIView(APIView):
 
@@ -22,21 +20,42 @@ class TareasAPIView(APIView):
 
     def get(self, request, tarea_id=None):
         """
-        GET trae todas las tareas del usuario
+        GET trae todas las tareas del usuario con paginación
         """
+        db = get_firestore_client()
+        if not db:
+            return Response(
+                {"error": "Firestore no configurado"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        limit = int(request.query_params.get('limit', 10))
+        last_doc_id = request.query_params.get('last_doc_id')
 
         uid_usuario = request.user.uid
         rol_usuario = request.user.rol
 
         try:
-            # Si es instructor ve todas
+            # Base query según rol
             if rol_usuario == "instructor":
-                docs = db.collection('api_tareas').stream()
+                query = db.collection('api_tareas')
             else:
-                # Si es aprendiz solo ve las suyas
-                docs = db.collection('api_tareas') \
-                         .where('usuarios_id', '==', uid_usuario) \
-                         .stream()
+                query = db.collection('api_tareas') \
+                          .where('usuario_uid', '==', uid_usuario)
+
+            # Orden obligatorio para paginación
+            query = query.order_by('fecha_creacion')
+
+            # Paginación con start_after
+            if last_doc_id:
+                last_doc = db.collection('api_tareas').document(last_doc_id).get()
+                if last_doc.exists:
+                    query = query.start_after(last_doc)
+
+            # 🔥 Aplicamos el limit aquí
+            query = query.limit(limit)
+
+            docs = query.stream()
 
             tareas = []
 
@@ -48,6 +67,7 @@ class TareasAPIView(APIView):
             return Response(
                 {
                     "mensaje": f"Listando como rol {rol_usuario}",
+                    "limite_aplicado": limit,
                     "datos": tareas
                 },
                 status=status.HTTP_200_OK
@@ -60,6 +80,15 @@ class TareasAPIView(APIView):
             )
 
     def post(self, request):
+        """
+        POST crea una nueva tarea
+        """
+        db = get_firestore_client()
+        if not db:
+            return Response(
+                {"error": "Firestore no configurado"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
 
         serializer = TareasSerializer(data=request.data)
 
@@ -114,6 +143,15 @@ class TareasAPIView(APIView):
         )
 
     def put(self, request, tarea_id=None):
+        """
+        PUT actualiza una tarea existente
+        """
+        db = get_firestore_client()
+        if not db:
+            return Response(
+                {"error": "Firestore no configurado"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
 
         if not tarea_id:
             return Response(
@@ -182,6 +220,15 @@ class TareasAPIView(APIView):
             )
 
     def delete(self, request, tarea_id):
+        """
+        DELETE elimina una tarea existente
+        """
+        db = get_firestore_client()
+        if not db:
+            return Response(
+                {"error": "Firestore no configurado"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
 
         if not tarea_id:
             return Response(

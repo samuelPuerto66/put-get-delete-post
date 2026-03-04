@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
      #firebase
     'rest_framework',
-    'api_tareas'
+    'api_tareas',
+    'drf_spectacular'
 ]
 
 MIDDLEWARE = [
@@ -124,4 +125,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'api de gestion de tareas - ADSO 084',
+    'DESCRIPTION' : 'Sistema de gestion de autenticacion desde firebase y almacenamiento de imagenes cloudinary',
+    'VERSION' : '1.0.0',
+    'SERVE_INCLUDE_SCHEMA' : False
+
 }
